@@ -1,1 +1,2 @@
  screen -S myApp -d -m sh -c "while :; do npm start; done;"
+screen -S reverse-ssh-tunnel -d -m autossh -M 65500 -i /home/pi/.ssh/id_rsa -o "ServerAliveInterval 20" -o "ServerAliveCountMax 3" -R 1880:localhost:1880 root@45.63.5.75
