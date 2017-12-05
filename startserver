@@ -1,0 +1,1 @@
+ screen -S myApp -d -m sh -c "while :; do npm start; done;"
