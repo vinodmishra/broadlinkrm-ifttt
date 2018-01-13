@@ -2,6 +2,7 @@
 const PORT = process.env.PORT || 1880;
 
 /* Modules */
+const yeelight = require('node-yeelight');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -13,6 +14,20 @@ const request = require('request');
 const commands = require('./commands');
 const Broadlink = require('./device');
 
+const y = new yeelight;
+y.on('ready', function() {
+	console.log('ready');
+	y.discover();
+});
+
+y.on('deviceadded', function(device) {
+	console.log('device added');
+	y.connect(device);
+});
+y.on('deviceconnected', function(device) {
+	console.log('device connected');
+});
+y.listen();
 function sendData(device = false, hexData = false) {
     if(device === false || hexData === false) {
         console.log('Missing params, sendData failed', typeof device, typeof hexData);
@@ -33,8 +48,11 @@ app.use(bodyParser.json());
 
 app.post('/command/:name', function(req, res) {
     const command = commands.find((e) => { return e.command == req.params.name; });
-
-    if (command && req.body.secret && req.body.secret == command.secret) {
+    if(req.params.name == 'yeelight'){
+       var state = y.devices[0].power == 'on' ? false : true;
+       y.setPower(y.devices[0],state, 300)
+       console.log('yeelight toggled');
+    } else if (command && req.body.secret && req.body.secret == command.secret) {
         let host = command.mac || command.ip;
         let device = Broadlink({ host });
 
